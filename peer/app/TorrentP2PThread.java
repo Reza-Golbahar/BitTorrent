@@ -1,43 +1,63 @@
 package peer.app;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
+import common.utils.MD5Hash;
+
+import java.io.*;
 import java.net.Socket;
 
 public class TorrentP2PThread extends Thread {
-	private final Socket socket;
-	private final File file;
-	private final String receiver;
-	private final BufferedOutputStream dataOutputStream;
+    private final Socket socket;
+    private final File file;
+    private final String receiver;
+    private final BufferedOutputStream dataOutputStream;
 
-	public TorrentP2PThread(Socket socket, File file, String receiver) throws IOException {
-		this.socket = socket;
-		this.file = file;
-		this.receiver = receiver;
-		this.dataOutputStream = new BufferedOutputStream(socket.getOutputStream());
-		PeerApp.addTorrentP2PThread(this);
-	}
+    public TorrentP2PThread(Socket socket, File file, String receiver) throws IOException {
+        this.socket = socket;
+        this.file = file;
+        this.receiver = receiver;
+        this.dataOutputStream = new BufferedOutputStream(socket.getOutputStream());
+        PeerApp.addTorrentP2PThread(this);
+    }
 
-	@Override
-	public void run() {
-		// TODO: Implement file transfer
-		// 1. Open file input stream
-		// 2. Read file in chunks and send to peer
-		// 3. Flush and close output stream
-		// 4. Update sent files list with file name and MD5 hash
+    @Override
+    public void run() {
+        // TODO: Implement file transfer
+        // 1. Open file input stream
+        try (
+                FileInputStream fileInputStream = new FileInputStream(file);
+                BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream())
+        )  {
 
-		try {
-			socket.close();
-		} catch (Exception e) {}
+            // 2. Read file in chunks and send to peer
+            byte[] buffer = new byte[4096];
+            int bytesRead;
 
-		PeerApp.removeTorrentP2PThread(this);
-	}
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
 
-	public void end() {
-		try {
-			dataOutputStream.close();
-			socket.close();
-		} catch (Exception e) {}
-	}
+            // 3. Flush and close output stream
+            out.flush();
+            // 4. Update sent files list with file name and MD5 hash
+            PeerApp.addSentFile(receiver, file.getName() + " " + MD5Hash.HashFile(file.getPath()));
+
+        } catch (Exception e) {
+            this.end();
+        }
+
+        try {
+            socket.close();
+        } catch (Exception e) {
+        }
+
+        PeerApp.removeTorrentP2PThread(this);
+    }
+
+    public void end() {
+        try {
+            dataOutputStream.close();
+            socket.close();
+        } catch (Exception e) {
+        }
+    }
 }

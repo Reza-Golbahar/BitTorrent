@@ -31,6 +31,7 @@ public class P2TConnectionThread extends ConnectionThread {
 			socket.setSoTimeout(0);
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -48,6 +49,6 @@ public class P2TConnectionThread extends ConnectionThread {
 	public void run() {
 		super.run();
 		PeerApp.endAll();
-		System.exit(0);
+		//System.exit(0);
 	}
 }

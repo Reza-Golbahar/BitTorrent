@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum PeerCommands implements CLICommands {
+	DOWNLOAD("download (?<filename>\\S+)"),
+	LIST("list"),
 	END("exit"),
 	TODO("TODO");
 	// TODO: Implement regex for each command
