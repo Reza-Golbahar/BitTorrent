@@ -25,23 +25,24 @@ public class TorrentP2PThread extends Thread {
         // 1. Open file input stream
         try (
                 FileInputStream fileInputStream = new FileInputStream(file);
-                BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream())
-        )  {
+                //OutputStream out = socket.getOutputStream()
+        ) {
 
             // 2. Read file in chunks and send to peer
             byte[] buffer = new byte[4096];
             int bytesRead;
 
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
+                dataOutputStream.write(buffer, 0, bytesRead);
             }
 
             // 3. Flush and close output stream
-            out.flush();
+            dataOutputStream.flush();
             // 4. Update sent files list with file name and MD5 hash
             PeerApp.addSentFile(receiver, file.getName() + " " + MD5Hash.HashFile(file.getPath()));
 
         } catch (Exception e) {
+            e.printStackTrace();
             this.end();
         }
 

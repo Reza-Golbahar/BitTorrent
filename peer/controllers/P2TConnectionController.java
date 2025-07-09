@@ -44,8 +44,10 @@ public class P2TConnectionController {
 
         for (String peerAddress : PeerApp.getReceivedFiles().keySet()) {
             List<String> fileNames = new ArrayList<>();
-            for (String fileName : PeerApp.getReceivedFiles().get(peerAddress)) {
-                fileNames.add("%s %s".formatted(fileName, MD5Hash.HashFile(fileName)));
+            for (String filenameAndHash : PeerApp.getReceivedFiles().get(peerAddress)) {
+                String filename = filenameAndHash.split(" ")[0];
+                String hash = filenameAndHash.split(" ")[1];
+                fileNames.add("%s %s".formatted(filename, hash));
             }
             receivedFiles.put(peerAddress, fileNames);
         }
@@ -65,8 +67,10 @@ public class P2TConnectionController {
 
         for (String peerAddress : PeerApp.getSentFiles().keySet()) {
             List<String> fileNames = new ArrayList<>();
-            for (String fileName : PeerApp.getSentFiles().get(peerAddress)) {
-                fileNames.add("%s %s".formatted(fileName, MD5Hash.HashFile(fileName)));
+            for (String filenameAndHash : PeerApp.getSentFiles().get(peerAddress)) {
+                String filename = filenameAndHash.split(" ")[0];
+                String hash = filenameAndHash.split(" ")[1];
+                fileNames.add("%s %s".formatted(filename, hash));
             }
             sentFiles.put(peerAddress, fileNames);
         }
@@ -103,11 +107,10 @@ public class P2TConnectionController {
             put("command", "status");
             put("response", "ok");
             put("peer", "%s".formatted(PeerApp.getPeerIP()));
-            put("listen_port", "%s".formatted(PeerApp.getPeerPort()));
+            put("listen_port", PeerApp.getPeerPort());
         }};
 
         return new Message(messageBody, Message.Type.response);
-        //throw new UnsupportedOperationException("status not implemented yet");
     }
 
     public static Message sendFileRequest(P2TConnectionThread tracker, String fileName) throws Exception {

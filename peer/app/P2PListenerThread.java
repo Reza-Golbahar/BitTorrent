@@ -31,8 +31,11 @@ public class P2PListenerThread extends Thread {
 
 		// 4. Handle download requests by starting a new TorrentP2PThread
 		if (messageType.equals(Message.Type.download_request)) {
-			File file = new File((String)fromJson.getFromBody("name"));
-			String receiver = fromJson.getFromBody("receiver_ip");
+			File file = new File(PeerApp.getSharedFolderPath(), fromJson.getFromBody("name"));
+			String receiver = "%s:%s".formatted(
+					fromJson.getFromBody("receiver_ip"),
+					fromJson.getIntFromBody("receiver_port"));
+
 			TorrentP2PThread torrentP2PThread = new TorrentP2PThread(socket, file, receiver);
 			torrentP2PThread.start();
 		}
@@ -50,6 +53,7 @@ public class P2PListenerThread extends Thread {
 				Socket socket = serverSocket.accept();
 				handleConnection(socket);
 			} catch (Exception e) {
+				e.printStackTrace();
 				break;
 			}
 		}

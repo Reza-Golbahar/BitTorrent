@@ -42,7 +42,7 @@ public class PeerConnectionThread extends ConnectionThread {
         Message response = sendAndWaitForResponse(new Message(messageBody, Message.Type.command), TIMEOUT_MILLIS);
         // then update peer's IP and port
         otherSideIP = response.getFromBody("peer");
-        otherSidePort = Integer.parseInt(response.getFromBody("listen_port"));
+        otherSidePort = response.getIntFromBody("listen_port");
     }
 
     public void refreshFileList() {

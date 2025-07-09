@@ -1,5 +1,10 @@
 package peer.app;
 
+import common.models.Message;
+import common.utils.JSONUtils;
+import common.utils.MD5Hash;
+
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
@@ -11,7 +16,7 @@ public class PeerApp {
 	private static String peerIP;
 
 	private static String sharedFolderPath;
-	//sentFiles -> {PeerAddress(ip:port), List of fileNames}
+	//sentFiles -> {PeerAddress(ip:port), List of {filename hash}}
 	private static Map<String, List<String>> sentFiles = new HashMap<>();
 	private static Map<String, List<String>> receivedFiles = new HashMap<>();
 
@@ -62,6 +67,7 @@ public class PeerApp {
 		exitFlag = true;
 		// 3. Clear file lists
 		//TODO
+		System.exit(0);
 	}
 
 	public static void connectTracker() {
@@ -70,7 +76,6 @@ public class PeerApp {
 		if (trackerConnectionThread != null && !trackerConnectionThread.isAlive()) {
 			trackerConnectionThread.start();
 		}
-		//throw new UnsupportedOperationException("Tracker connection not implemented yet");
 	}
 
 	public static void startListening() {
@@ -79,13 +84,12 @@ public class PeerApp {
 		if (p2PListenerThread != null && !p2PListenerThread.isAlive()) {
 			p2PListenerThread.start();
 		}
-		//throw new UnsupportedOperationException("Peer listener thread not implemented yet");
 	}
 
 	public static void removeTorrentP2PThread(TorrentP2PThread torrentP2PThread) {
 		// TODO: Remove and cleanup torrent thread
-
-		//throw new UnsupportedOperationException("Torrent P2P thread not implemented yet");
+		torrentP2PThreads.remove(torrentP2PThread);
+		torrentP2PThread.end();
 	}
 
 	public static void addTorrentP2PThread(TorrentP2PThread torrentP2PThread) {
@@ -105,12 +109,12 @@ public class PeerApp {
 
 	public static void addSentFile(String receiver, String fileNameAndHash) {
 		// TODO: Add file to sent files list
-		throw new UnsupportedOperationException("Sent files not implemented yet");
+		sentFiles.computeIfAbsent(receiver, k -> new ArrayList<>()).add(fileNameAndHash);
 	}
 
 	public static void addReceivedFile(String sender, String fileNameAndHash) {
 		// TODO: Add file to received files list
-		throw new UnsupportedOperationException("Received files not implemented yet");
+		receivedFiles.computeIfAbsent(sender, k -> new ArrayList<>()).add(fileNameAndHash);
 	}
 
 	public static String getPeerIP() {
@@ -125,12 +129,20 @@ public class PeerApp {
 
 	public static Map<String, List<String>> getSentFiles() {
 		// TODO: Get copy of sent files map
-		throw new UnsupportedOperationException("Received files not implemented yet");
+		Map<String, List<String>> copy = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : sentFiles.entrySet()) {
+			copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+		}
+		return copy;
 	}
 
 	public static Map<String, List<String>> getReceivedFiles() {
 		// TODO: Get copy of received files map
-		throw new UnsupportedOperationException("Received files not implemented yet");
+		Map<String, List<String>> copy = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : receivedFiles.entrySet()) {
+			copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+		}
+		return copy;
 	}
 
 	public static P2TConnectionThread getP2TConnection() {
@@ -141,15 +153,57 @@ public class PeerApp {
 	public static void requestDownload(String ip, int port, String filename, String md5) throws Exception {
 		// TODO: Implement file download from peer
 		// 1. Check if file already exists
+		File file = new File(sharedFolderPath, filename);
+		if (file.exists()) {
+			throw new RuntimeException("You already have the file!");
+		}
+
 		// 2. Create download request message
+		HashMap<String, Object> messageBody = new HashMap<>() {{
+			put("name", filename);
+			put("md5", md5);
+			put("receiver_ip", PeerApp.getPeerIP());
+			put("receiver_port", PeerApp.getPeerPort());
+		}};
+		Message request = new Message(messageBody, Message.Type.download_request);
+
 		// 3. Connect to peer
+		Socket socket = new Socket(ip, port);
+
 		// 4. Send request
+		String JSONString = JSONUtils.toJson(request);
+
+		try {
+			DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+			dataOutputStream.writeUTF(JSONString);
+			dataOutputStream.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		// 5. Receive file data
 		// 6. Save file
+		FileOutputStream fileOut = new FileOutputStream(file);
+		InputStream dataInputStream = socket.getInputStream();
+
+		byte[] buffer = new byte[4096];
+		int bytesRead;
+
+		while ((bytesRead = dataInputStream.read(buffer)) != -1) {
+			fileOut.write(buffer, 0, bytesRead);
+		}
+		fileOut.close();
+		socket.close();
+
 		// 7. Verify file integrity
+		String downloadedMd5 = MD5Hash.HashFile(file.getAbsolutePath());
+		if (!downloadedMd5.equals(md5)) {
+			file.delete();
+			throw new RuntimeException("The file has been downloaded from peer but is corrupted!");
+		}
+
 		// 8. Update received files list
-		String peerAddress = "%s %s".formatted();
-		//receivedFiles.get().add();
-		throw new UnsupportedOperationException("File download not implemented yet");
+		addReceivedFile(ip + ":" + port, filename + " " + md5);
 	}
+
 }
