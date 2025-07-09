@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 
 public class TrackerCLIController {
     public static String processCommand(String command) {
-        // TODO: Process tracker CLI commands
         // 1. Check command type (END_PROGRAM, REFRESH_FILES, RESET_CONNECTIONS, LIST_PEERS, LIST_FILES, GET_RECEIVES, GET_SENDS)
         TrackerCommands commandType = null;
         for (TrackerCommands value : TrackerCommands.values()) {
@@ -141,11 +140,9 @@ public class TrackerCLIController {
                     peerConnectionThread.getFileAndHashes().get(filename)));
         }
         return result.toString().trim();
-        //throw new UnsupportedOperationException("listFiles not implemented yet");
     }
 
     private static String listPeers() {
-        // TODO: List all connected peers
         StringBuilder result = new StringBuilder();
         for (PeerConnectionThread connection : TrackerApp.getConnections()) {
             result.append("%s:%s\n".formatted(connection.getOtherSideIP(), connection.getOtherSidePort()));
@@ -156,7 +153,6 @@ public class TrackerCLIController {
     }
 
     private static String resetConnections() {
-        // TODO: Reset all peer connections
         // Refresh status and file list for each peer
         for (PeerConnectionThread connection : TrackerApp.getConnections()) {
             connection.refreshStatus();
@@ -165,7 +161,6 @@ public class TrackerCLIController {
     }
 
     private static String refreshFiles() {
-        // TODO: Refresh file lists for all peers
         for (PeerConnectionThread connection : TrackerApp.getConnections()) {
             connection.refreshFileList();
         }

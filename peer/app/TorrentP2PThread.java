@@ -21,7 +21,6 @@ public class TorrentP2PThread extends Thread {
 
     @Override
     public void run() {
-        // TODO: Implement file transfer
         // 1. Open file input stream
         try (
                 FileInputStream fileInputStream = new FileInputStream(file);

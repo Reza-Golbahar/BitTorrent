@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 
 public class MD5Hash {
 	public static String HashFile(String filePath) {
-		// TODO: Calculate MD5 hash of file
 		// 1. Open file input stream
 		try (FileInputStream fis = new FileInputStream(filePath)) {
 			// 2. Create message digest

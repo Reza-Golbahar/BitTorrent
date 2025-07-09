@@ -1,6 +1,7 @@
 package peer.controllers;
 
 import common.models.Message;
+import common.utils.FileUtils;
 import common.utils.MD5Hash;
 import peer.app.PeerApp;
 
@@ -8,11 +9,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class PeerCLIController {
 	public static String processCommand(String command) {
-		// TODO: Process Peer CLI commands
 		// 1. Check command type (END_PROGRAM, DOWNLOAD, LIST)
 		// 2. Call appropriate handler
 		// 3. Return result or error message
@@ -26,34 +27,15 @@ public class PeerCLIController {
 	}
 
 	private static String handleListFiles() {
-		// TODO: Handle list files command
-		ArrayList<File> files = new ArrayList<>();
-		File folder = new File(PeerApp.getSharedFolderPath());
-		if (folder.exists() && folder.isDirectory()) {
-			for (File file : folder.listFiles()) {
-				if (file.isFile())
-					files.add(file);
-			}
-		}
-
-		files.sort(Comparator.comparing(File::getName));
-
-		StringBuilder result = new StringBuilder();
-		for (File file : files) {
-			result.append("%s %s\n".formatted(
-					file.getName(),
-					MD5Hash.HashFile(file.getPath())
-			));
-		}
+		Map<String, String> filenamesAndHashes = FileUtils.listFilesInFolder(PeerApp.getSharedFolderPath());
+		String result = FileUtils.getSortedFileList(filenamesAndHashes);
 
 		if (result.isEmpty())
 			return "Repository is empty.";
-
-		return result.toString().trim();
+		return result;
 	}
 
 	private static String handleDownload(String command) {
-		// TODO: Handle download command
 		// Send file request to tracker
 		Matcher matcher = PeerCommands.DOWNLOAD.getMatcher(command);
 		matcher.matches();

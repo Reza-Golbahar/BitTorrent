@@ -11,7 +11,6 @@ import java.util.*;
 public class PeerApp {
 	public static final int TIMEOUT_MILLIS = 500;
 
-	// TODO: static fields for peer's ip, port, shared folder path, sent files, received files, tracker connection thread, p2p listener thread, torrent p2p threads
 	private static int peerPort;
 	private static String peerIP;
 
@@ -31,7 +30,6 @@ public class PeerApp {
 	}
 
 	public static void initFromArgs(String[] args) throws Exception {
-		// TODO: Initialize peer with command line arguments
 		// 1. Parse self address (ip:port)
 		int portStartIndex = args[0].lastIndexOf(":");
 		peerPort = Integer.parseInt(args[0].substring(portStartIndex + 1));
@@ -55,7 +53,6 @@ public class PeerApp {
 
 	public static void endAll() {
 		exitFlag = true;
-		// TODO: Implement cleanup
 		// 1. End tracker connection
 		trackerConnectionThread.end();
 		// 2. End all torrent threads
@@ -66,12 +63,10 @@ public class PeerApp {
 
 		exitFlag = true;
 		// 3. Clear file lists
-		//TODO
 		System.exit(0);
 	}
 
 	public static void connectTracker() {
-		// TODO: Start tracker connection thread
 		// Check if thread exists and not running, then Start thread
 		if (trackerConnectionThread != null && !trackerConnectionThread.isAlive()) {
 			trackerConnectionThread.start();
@@ -79,7 +74,6 @@ public class PeerApp {
 	}
 
 	public static void startListening() {
-		// TODO: Start peer listener thread
 		// Check if thread exists and not running, then Start thread
 		if (p2PListenerThread != null && !p2PListenerThread.isAlive()) {
 			p2PListenerThread.start();
@@ -87,13 +81,11 @@ public class PeerApp {
 	}
 
 	public static void removeTorrentP2PThread(TorrentP2PThread torrentP2PThread) {
-		// TODO: Remove and cleanup torrent thread
 		torrentP2PThreads.remove(torrentP2PThread);
 		torrentP2PThread.end();
 	}
 
 	public static void addTorrentP2PThread(TorrentP2PThread torrentP2PThread) {
-		// TODO: Add new torrent thread
 		// 1. Check if thread is valid
 		if (torrentP2PThread == null) return;
 		// 2. Check if already exists
@@ -103,32 +95,26 @@ public class PeerApp {
 	}
 
 	public static String getSharedFolderPath() {
-		// TODO: Get shared folder path
 		return sharedFolderPath;
 	}
 
 	public static void addSentFile(String receiver, String fileNameAndHash) {
-		// TODO: Add file to sent files list
 		sentFiles.computeIfAbsent(receiver, k -> new ArrayList<>()).add(fileNameAndHash);
 	}
 
 	public static void addReceivedFile(String sender, String fileNameAndHash) {
-		// TODO: Add file to received files list
 		receivedFiles.computeIfAbsent(sender, k -> new ArrayList<>()).add(fileNameAndHash);
 	}
 
 	public static String getPeerIP() {
-		// TODO: Get peer IP address
 		return peerIP;
 	}
 
 	public static int getPeerPort() {
-		// TODO: Get peer port
 		return peerPort;
 	}
 
 	public static Map<String, List<String>> getSentFiles() {
-		// TODO: Get copy of sent files map
 		Map<String, List<String>> copy = new HashMap<>();
 		for (Map.Entry<String, List<String>> entry : sentFiles.entrySet()) {
 			copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
@@ -137,7 +123,6 @@ public class PeerApp {
 	}
 
 	public static Map<String, List<String>> getReceivedFiles() {
-		// TODO: Get copy of received files map
 		Map<String, List<String>> copy = new HashMap<>();
 		for (Map.Entry<String, List<String>> entry : receivedFiles.entrySet()) {
 			copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
@@ -146,12 +131,10 @@ public class PeerApp {
 	}
 
 	public static P2TConnectionThread getP2TConnection() {
-		// TODO: Get tracker connection thread
 		return trackerConnectionThread;
 	}
 
 	public static void requestDownload(String ip, int port, String filename, String md5) throws Exception {
-		// TODO: Implement file download from peer
 		// 1. Check if file already exists
 		File file = new File(sharedFolderPath, filename);
 		if (file.exists()) {

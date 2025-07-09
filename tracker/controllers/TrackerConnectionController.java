@@ -10,7 +10,6 @@ import static tracker.app.TrackerApp.TIMEOUT_MILLIS;
 
 public class TrackerConnectionController {
 	public static Message handleCommand(Message message) {
-		// TODO: Handle incoming peer-to-tracker commands
 		// 1. Validate message type and content
 		String filename = message.getFromBody("name");
 		List<PeerConnectionThread> peers = new ArrayList<>();
@@ -55,7 +54,6 @@ public class TrackerConnectionController {
 	}
 
 	public static Map<String, List<String>> getSends(PeerConnectionThread connection) {
-		// TODO: Get list of files sent by a peer
 		// 1. Build command message
 		HashMap<String, Object> commandBody = new HashMap<>();
 		commandBody.put("command", "get_sends");
@@ -96,7 +94,6 @@ public class TrackerConnectionController {
 	}
 
 	public static Map<String, List<String>> getReceives(PeerConnectionThread connection) {
-		// TODO: Get list of files received by a peer
 		// 1. Build command message
 		HashMap<String, Object> commandBody = new HashMap<>();
 		commandBody.put("command", "get_receives");
