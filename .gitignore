@@ -27,3 +27,23 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# === Java build artifacts ===
+*.class
+*.jar
+
+# === Temporary build directories ===
+out_peer/
+temp_lib/
+
+# === OS-specific files ===
+.DS_Store         # macOS
+Thumbs.db         # Windows
+
+# === IDE/editor-specific files ===
+.idea/            # IntelliJ
+*.iml
+.vscode/          # VSCode
+
+# === Log files ===
+*.log
